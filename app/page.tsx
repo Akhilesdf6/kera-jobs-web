@@ -1,4 +1,60 @@
-import {getJobs} from '../lib/jobs';import {notFound} from 'next/navigation';import type {Metadata} from 'next';
-export const revalidate=900;
-export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{const {id}=await params;const j=(await getJobs()).find(x=>String(x.id)===id);return {title:j?.title||'Job not found',description:j?`${j.organization} recruitment. Qualification: ${j.qualification||'See notice'}. Apply via official link.`:undefined}}
-export default async function JobDetail({params}:{params:Promise<{id:string}>}){const {id}=await params;const j=(await getJobs()).find(x=>String(x.id)===id);if(!j)notFound();return <main className="wrap section detail"><span className="badge">VERIFIED NOTIFICATION</span><h1>{j.title}</h1><p className="lead">{j.organization}</p><div className="detailGrid"><div><small>Qualification</small><strong>{j.qualification||'Check official notification'}</strong></div><div><small>Location</small><strong>{j.location||'See notification'}</strong></div><div><small>Last date</small><strong>{j.last_date||'Check official notification'}</strong></div></div><h2>Official recruitment information</h2><p>Review the original notification for eligibility, age limits, vacancies, selection procedure, fees and application instructions. The official source is authoritative.</p><div className="actions"><a className="btn" href={j.notification_url} target="_blank" rel="noopener noreferrer">Read Official Notification ↗</a>{j.apply_url&&<a className="btn secondary" href={j.apply_url} target="_blank" rel="noopener noreferrer">Apply on Official Website ↗</a>}</div><p className="warning">Kera Jobs is an independent information portal, not a recruiting agency. Confirm deadlines and details on the official website.</p></main>}
+import Link from 'next/link';
+import { getJobs } from '../lib/jobs';
+
+export const revalidate = 900;
+
+export default async function HomePage() {
+  const jobs = await getJobs();
+
+  return (
+    <main className="wrap section">
+      <section>
+        <span className="badge">KERALA GOVERNMENT JOBS</span>
+        <h1>Find Your Next Government Job</h1>
+        <p className="lead">
+          Latest Kerala PSC, Central Government and
+          Kerala Government recruitment notifications.
+        </p>
+      </section>
+
+      <section>
+        <h2>Latest Job Notifications</h2>
+
+        {jobs.length === 0 ? (
+          <p>No job notifications available right now.</p>
+        ) : (
+          <div className="jobsGrid">
+            {jobs.map((job) => (
+              <article className="jobCard" key={job.id}>
+                <span className="badge">
+                  {job.organization}
+                </span>
+
+                <h3>{job.title}</h3>
+
+                <p>
+                  Qualification: {job.qualification || 'See notification'}
+                </p>
+
+                <p>
+                  Location: {job.location || 'Kerala'}
+                </p>
+
+                <p>
+                  Last Date: {job.last_date || 'See notification'}
+                </p>
+
+                <Link
+                  className="btn"
+                  href={`/jobs/${job.id}`}
+                >
+                  View Job Details →
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
